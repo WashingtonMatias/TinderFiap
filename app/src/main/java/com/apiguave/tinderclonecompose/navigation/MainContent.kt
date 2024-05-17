@@ -27,15 +27,11 @@ fun NavigationGraph() {
         NavHost(navController = navController, startDestination = Routes.Login) {
             animatedComposable(Routes.Login) {
                 LoginScreen(
-                    onNavigateToHome = {
-                        navController.navigate(Routes.Home){
-                            popUpTo(Routes.Login){
-                                inclusive = true
-                            }
-                        }
-                    },
                     onNavigateToSignUp = {
                         navController.navigate(Routes.SignUp)
+                    },
+                    onLoginSuccess = {
+                        navController.navigate(Routes.Home)
                     }
                 )
             }

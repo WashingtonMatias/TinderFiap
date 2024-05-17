@@ -36,6 +36,7 @@ fun SignUpScreen(
         removePictureAt = signUpViewModel::removePictureAt,
         onSignUpClicked = {
             coroutineScope.launch {
+                //aqui onde chama o google para pegar o usuario e senha
                 startForResult.launch(signInClient.signInIntent)
             }
         },
