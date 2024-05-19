@@ -27,10 +27,11 @@ import com.apiguave.tinderclonecompose.theme.Pink
 import com.apiguave.tinderclonecompose.theme.TinderCloneComposeTheme
 
 @Composable
-fun LoginView(uiState: LoginViewState,
-              onNavigateToSignUp: () -> Unit,
-              onSignInClicked: () -> Unit) {
-
+fun LoginView(
+    uiState: LoginViewState,
+    onNavigateToSignUp: () -> Unit,
+    onLoginOnClicked: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,13 +45,12 @@ fun LoginView(uiState: LoginViewState,
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
         AnimatedLogo(modifier = Modifier
             .fillMaxWidth(.4f)
             .padding(bottom = 8.dp), isAnimating = uiState.isLoading)
-        Column(modifier = Modifier.weight(1.0f)){
+        Column(modifier = Modifier.weight(1.0f)) {
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 modifier = Modifier
@@ -71,7 +71,6 @@ fun LoginView(uiState: LoginViewState,
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text(stringResource(id = R.string.create_account).uppercase(), color = Color.Gray)
                 }
-
             }
 
             Spacer(Modifier.height(6.dp))
@@ -81,7 +80,7 @@ fun LoginView(uiState: LoginViewState,
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
                     .alpha(if (uiState.isLoading) 0f else 1f),
-                onClick = onSignInClicked,
+                onClick = onLoginOnClicked,
                 contentPadding = PaddingValues(
                     start = 20.dp,
                     top = 12.dp,
@@ -92,13 +91,18 @@ fun LoginView(uiState: LoginViewState,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent)
             ) {
-                Box(Modifier.fillMaxWidth()){
-                   Image(
-                       modifier = Modifier.align(Alignment.CenterStart),
-                       painter = painterResource(id = R.drawable.google_icon),
-                       contentDescription = null
-                   )
-                   Text(modifier = Modifier.align(Alignment.Center), textAlign = TextAlign.Center,text = stringResource(id = R.string.sign_in_with_google).uppercase(), color = Color.White)
+                Box(Modifier.fillMaxWidth()) {
+                    Image(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        painter = painterResource(id = R.drawable.google_icon),
+                        contentDescription = null
+                    )
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        textAlign = TextAlign.Center,
+                        text = stringResource(id = R.string.sign_in_with_google).uppercase(),
+                        color = Color.White
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(44.dp))
@@ -113,7 +117,7 @@ fun LoginViewPreview() {
         LoginView(
             uiState = LoginViewState(false, false, null),
             onNavigateToSignUp = { },
-            onSignInClicked = {}
+            onLoginOnClicked = {}
         )
     }
 }

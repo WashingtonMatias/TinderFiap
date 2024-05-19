@@ -1,52 +1,87 @@
 package com.apiguave.tinderclonecompose.signup
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignUpScreen(
-    onNavigateToHome: () -> Unit) {
-    val signUpViewModel: SignUpViewModel = koinViewModel()
-    val uiState by signUpViewModel.uiState.collectAsState()
-
-    LaunchedEffect(key1 = uiState, block = {
-        if(uiState.isUserSignedIn){
-            onNavigateToHome()
-        }
-    })
-
-    val signInClient: GoogleSignInClient = get()
+    onLoginSuccess: () -> Unit
+) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val startForResult = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = signUpViewModel::signUp
-    )
-    SignUpView(
-        uiState = uiState,
-        onPictureSelected = signUpViewModel::addPicture,
-        removePictureAt = signUpViewModel::removePictureAt,
-        onSignUpClicked = {
-            coroutineScope.launch {
-                //aqui onde chama o google para pegar o usuario e senha
-                startForResult.launch(signInClient.signInIntent)
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Nome de usuário") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Senha") },
+            visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                isLoading = true
+                coroutineScope.launch {
+                    // Simular registro do usuário (por exemplo, API ou banco de dados)
+                    delay(1000) // Simular tempo de registro
+                    isLoading = false
+                    if (isRegistrationValid(username, email, password)) {
+                        onLoginSuccess()
+                    } else {
+                        // Exibir mensagem de erro
+                    }
+                }
+            },
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Text("Registrar")
             }
-        },
-        onCloseDialogClicked = signUpViewModel::closeDialog,
-        onDeletePictureClicked = signUpViewModel::showConfirmDeletionDialog,
-        onSelectPictureClicked = signUpViewModel::showSelectPictureDialog,
-        onBirthDateChanged = signUpViewModel::setBirthDate,
-        onNameChanged = signUpViewModel::setName,
-        onBioChanged = signUpViewModel::setBio,
-        onGenderIndexChanged = signUpViewModel::setGenderIndex,
-        onOrientationIndexChanged = signUpViewModel::setOrientationIndex
-    )
+        }
+    }
+}
+
+fun isRegistrationValid(username: String, email: String, password: String): Boolean {
+    // Lógica de validação simples para exemplo
+    return username.isNotEmpty() && email.isNotEmpty() && password.length >= 6
 }
