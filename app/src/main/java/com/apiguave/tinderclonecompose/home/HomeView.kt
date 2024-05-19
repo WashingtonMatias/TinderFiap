@@ -1,5 +1,6 @@
 package com.apiguave.tinderclonecompose.home
 
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.apiguave.tinderclonecompose.R
 import com.apiguave.tinderclonecompose.components.*
 import com.apiguave.tinderclonecompose.components.dialogs.NewMatchDialog
+import com.apiguave.tinderclonecompose.model.ProfilePictureState
 import com.apiguave.tinderclonecompose.theme.Green1
 import com.apiguave.tinderclonecompose.theme.Green2
 import com.apiguave.tinderclonecompose.theme.Orange
@@ -37,12 +39,17 @@ fun HomeView(
     fetchProfiles: () -> Unit,
     swipeUser: (ProfileState, Boolean) -> Unit,
     onSendMessage: (String, String) -> Unit,
-    onCloseDialog: () -> Unit) {
+    onCloseDialog: () -> Unit
+) {
     val scope = rememberCoroutineScope()
 
-    when(uiState.dialogState) {
+    when (uiState.dialogState) {
         is HomeViewDialogState.NewMatchDialog -> {
-            NewMatchDialog(pictureStates = uiState.dialogState.pictureStates, onSendMessage = { onSendMessage(uiState.dialogState.match.id, it) }, onCloseClicked = onCloseDialog)
+            NewMatchDialog(
+                pictureUrls = uiState.dialogState.pictureUrls,
+                onSendMessage = { onSendMessage(uiState.dialogState.match.id, it) },
+                onCloseClicked = onCloseDialog
+            )
         }
         else -> {}
     }
@@ -74,27 +81,7 @@ fun HomeView(
                 .fillMaxSize()
                 .padding(padding), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when(uiState.contentState){
-                is HomeViewContentState.Error-> {
-                    Spacer(Modifier.weight(1f))
-                    Text(modifier = Modifier.padding(horizontal = 8.dp),
-                        text = uiState.contentState.message, color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center)
-                    Spacer(Modifier.height(12.dp))
-                    GradientButton(onClick = {
-                        scope.launch {
-                            delay(200)
-                            fetchProfiles()
-                        }
-                    }) {
-                        Text(stringResource(id = R.string.retry))
-                    }
-                    Spacer(Modifier.weight(1f))
-                }
-                HomeViewContentState.Loading -> {
-                    Spacer(Modifier.weight(1f))
-                    AnimatedGradientLogo(Modifier.fillMaxWidth(.4f))
-                    Spacer(Modifier.weight(1f))
-                }
+            when (uiState.contentState) {
                 is HomeViewContentState.Success -> {
                     Spacer(Modifier.weight(1f))
                     Box(Modifier.padding(horizontal = 12.dp)) {
@@ -108,7 +95,7 @@ fun HomeView(
 
                         val swipeStates = uiState.contentState.profileStates.map { rememberSwipeableCardState() }
                         uiState.contentState.profileStates.forEachIndexed { index, profileState ->
-                            ProfileCardView(profileState.profile, profileState.pictureStates,
+                            ProfileCardView(profileState.profile, listaImutavel,
                                 modifier = Modifier.swipableCard(
                                     state = swipeStates[index],
                                     onSwiped = {
@@ -163,6 +150,28 @@ fun HomeView(
                     }
                     Spacer(Modifier.weight(1f))
                 }
+                is HomeViewContentState.Error -> {
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = uiState.contentState.message, color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    GradientButton(onClick = {
+                        scope.launch {
+                            delay(200)
+                            fetchProfiles()
+                        }
+                    }) {
+                        Text(stringResource(id = R.string.retry))
+                    }
+                    Spacer(Modifier.weight(1f))
+                }
+                HomeViewContentState.Loading -> {
+                    Spacer(Modifier.weight(1f))
+                    AnimatedGradientLogo(Modifier.fillMaxWidth(.4f))
+                    Spacer(Modifier.weight(1f))
+                }
             }
         }
     }
@@ -178,11 +187,9 @@ fun HomeViewPreview() {
             navigateToMatchList = {},
             removeLastProfile = {},
             fetchProfiles = {},
-            swipeUser = { _, _ ->
-
-            },
+            swipeUser = { _, _ -> },
             onCloseDialog = {},
-            onSendMessage = { _, _ ->}
+            onSendMessage = { _, _ -> }
         )
     }
 }
